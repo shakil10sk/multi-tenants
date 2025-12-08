@@ -18,6 +18,7 @@ services:
 
   # React frontend
   frontend:
+    platform: linux/amd64
     build: ./frontend
     container_name: multi_tenant_frontend
     restart: unless-stopped
@@ -47,8 +48,11 @@ services:
     image: mysql:8.1
     container_name: mysql_db
     restart: unless-stopped
-    env_file:
-      - ./.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - DB_DATABASE=multi_tenant_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
     ports:
       - "3306:3306"
     volumes:
