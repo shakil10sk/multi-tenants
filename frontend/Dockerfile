@@ -1,17 +1,21 @@
-FROM node:20-alpine
+# Use ARM64 Node image
+FROM --platform=linux/amd64 node:20
 
 WORKDIR /app
 
-RUN apk add --no-cache bash git curl
+# Install build tools
+RUN apt-get update && apt-get install -y python3 make g++ git curl && rm -rf /var/lib/apt/lists/*
 
-# Only create React app if package.json doesn't exist
-RUN if [ ! -f package.json ]; then \
-      npx create-react-app /tmp/react-app && \
-      cp -R /tmp/react-app/* /app/; \
-    fi
+# Copy package.json and package-lock.json first (better cache)
+COPY package*.json ./
 
-# Install dependencies
+RUN rm -rf node_modules package-lock.json
+
+# Force install all dependencies including devDependencies
 RUN npm install
 
-EXPOSE 3000
-CMD ["npm", "start"]
+# Copy the rest of the code
+COPY . .
+
+# Use CMD to start Vite dev server
+CMD ["npm", "run", "dev"]
